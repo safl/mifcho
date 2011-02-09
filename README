@@ -1,0 +1,10 @@
+MIFCHO can be used as a tool for different purposes, current components support:
+
+ * Accessing Firewalled Networks (similar to Goodle Secure Data Connector - http://code.google.com/p/google-secure-data-connector/)
+ * Tunneling with and without SSL/TLS ( similar to http://www.stunnel.org/ and [http://www.ssh.com/support/documentation/online/ssh/winhelp/32/Local_And_Remote_Forwarding.html SSH-forwarding/tunneling] )
+ * Websocket Gateway ( similar to http://www.kaazing.org/confluence/display/KAAZING/Home)
+ * Adding proxy capabilities to protocols not supporting proxying by intercepting connections.
+
+MIFCHO is used as a websocket to socket gateway by [http://code.google.com/p/jsvnc/ jsVNC].
+
+No releases, yet... but feel free to poke around In the source-code.

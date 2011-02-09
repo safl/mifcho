@@ -1,0 +1,7 @@
+# Install
+
+    ./setup.py install --record=install-files.txt
+
+# Uninstall
+
+    ./setup.py uninstall --manifest=install-files.txt

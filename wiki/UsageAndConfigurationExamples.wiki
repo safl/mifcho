@@ -1,0 +1,103 @@
+#summary Configuration Examples for different use-cases
+
+= Introduction =
+
+This section provides configuration examples for different uses of MIFCHO.
+It starts out with the most simple usages and then continues with how to combine different usages.
+
+= Forwarding =
+
+In this use case whenever a client opens a TCP socket to mifcho01, they will be forwarded to one of the three hosts. This functionality is quite similar to nat-forwarding.
+The orchestration defined in the configuration below defines the mapping:
+
+{{{
+mifcho01:8000 => host01:8000
+mifcho01:8001 => host02:8000
+mifcho01:8002 => host03:8000
+}}}
+
+http://mifcho.googlecode.com/svn/trunk/doc/usage/forwarding.png
+
+Save the following to a file "mifcho01.conf".
+
+{{{
+[General]
+
+bind=
+  tcp://mifcho01:8000
+  tcp://mifcho01:8001
+  tcp://mifcho01:8002
+
+orchestration =
+  8001 tcp /None TCPTunnelingHandler forward to host01:8000
+  8002 tcp /None TCPTunnelingHandler forward to host02:8000
+  8003 tcp /None TCPTunnelingHandler forward to host03:8000
+
+[TCPTunnelingHandler]
+workers = 10
+}}}
+
+Then invoke mifcho01:
+{{{
+mifcho -c mifcho01.conf -l mifcho.log -i 2222
+}}}
+
+= Tunneling =
+
+In the forwarding example above direct access to mifcho is available but in many cases such direct access is provided due to firewall-restrictions on ingoing traffic. In such situations two mifcho-instances can be used, one inside the restricted network and one outside the network.
+
+http://mifcho.googlecode.com/svn/trunk/doc/usage/tunneling.png
+
+The following configuration tells Mifcho01 to connect with Mifcho02, store this configuration in mifcho01.conf:
+
+{{{
+[General]
+bind=
+orchestration =
+peers=
+    http://mifcho02:10000/mifcho
+}}}
+
+Then invoke mifcho:
+{{{
+mifcho -c mifcho01.conf -l mifcho.log -i 2222
+}}}
+
+Then configure mifcho02 to accept connections from peers and define the tunneling orchestration.
+
+{{{
+[General]
+
+bind=
+  tcp://0.0.0.0:8000
+  tcp://0.0.0.0:8001
+  tcp://0.0.0.0:8002
+  tcp://0.0.0.0:10000
+
+orchestration =
+  8000 tcp /None TCPTunnelingHandler forward to host01:8000 via 2222
+  8001 tcp /None TCPTunnelingHandler forward to host02:8000 via 2222
+  8002 tcp /None TCPTunnelingHandler forward to host03:8000 via 2222
+  10000 http /mifcho PeerHandler
+}}}
+
+Then invoke mifcho02:
+{{{
+mifcho -c mifcho02.conf -l mifcho.log -i 4321
+}}}
+
+= WebSocket to Socket Gateway =
+
+...
+
+= Hobs to Socket Gateway =
+
+...
+
+= Static Webserver =
+
+...
+
+= Management =
+
+Provides information about a mifcho instance encapsulated in JSON.

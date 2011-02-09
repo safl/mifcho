@@ -1,0 +1,427 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to mifcho’s documentation! &mdash; mifcho v0.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '#',
+        VERSION:     '0.1',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mifcho v0.1 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
+        <li><a href="#">mifcho v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="welcome-to-mifcho-s-documentation">
+<h1>Welcome to mifcho&#8217;s documentation!<a class="headerlink" href="#welcome-to-mifcho-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Contents:</p>
+<ul class="simple">
+</ul>
+<div class="section" id="module-mifcholib.handlers">
+<h2>Handlers<a class="headerlink" href="#module-mifcholib.handlers" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mifcholib.handlers.HobsHandler">
+<em class="property">class </em><tt class="descclassname">mifcholib.handlers.</tt><tt class="descname">HobsHandler</tt><big>(</big><em>cm</em><big>)</big><a class="headerlink" href="#mifcholib.handlers.HobsHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accepts jobs in the form:</p>
+<blockquote>
+(conn, addr, (method, uri, status))</blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="mifcholib.handlers.ManagementHandler">
+<em class="property">class </em><tt class="descclassname">mifcholib.handlers.</tt><tt class="descname">ManagementHandler</tt><big>(</big><em>cm</em><big>)</big><a class="headerlink" href="#mifcholib.handlers.ManagementHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accepts jobs on the form:</p>
+<blockquote>
+(conn, address, request_line)</blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="mifcholib.handlers.PeerHandler">
+<em class="property">class </em><tt class="descclassname">mifcholib.handlers.</tt><tt class="descname">PeerHandler</tt><big>(</big><em>cm</em><big>)</big><a class="headerlink" href="#mifcholib.handlers.PeerHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accepts jobs on the form:</p>
+<p>(conn, address, (method, uri, version))</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mifcholib.handlers.StaticWebHandler">
+<em class="property">class </em><tt class="descclassname">mifcholib.handlers.</tt><tt class="descname">StaticWebHandler</tt><big>(</big><em>path_prefix=''</em><big>)</big><a class="headerlink" href="#mifcholib.handlers.StaticWebHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spit out static-files over http.
+Accepts jobs on the form:</p>
+<blockquote>
+(conn, address, (method, uri, version))</blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="mifcholib.handlers.TCPTunnelingHandler">
+<em class="property">class </em><tt class="descclassname">mifcholib.handlers.</tt><tt class="descname">TCPTunnelingHandler</tt><big>(</big><em>cm</em><big>)</big><a class="headerlink" href="#mifcholib.handlers.TCPTunnelingHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jobs on the form:</p>
+<blockquote>
+(connection, address, (peer_id, ep_host, ep_port))</blockquote>
+<p>Providing a peer_id will cause the tunneling to be routed through the
+peer identified by peer_id.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mifcholib.handlers.WebsocketHandler">
+<em class="property">class </em><tt class="descclassname">mifcholib.handlers.</tt><tt class="descname">WebsocketHandler</tt><big>(</big><em>cm</em><big>)</big><a class="headerlink" href="#mifcholib.handlers.WebsocketHandler" title="Permalink to this definition">¶</a></dt>
+<dd>Handles (conn, address, data) jobs.
+Parses the communication based on the websocket draft 75</dd></dl>
+
+</div>
+<div class="section" id="module-mifcholib.cm">
+<h2>ConnectionManager<a class="headerlink" href="#module-mifcholib.cm" title="Permalink to this headline">¶</a></h2>
+<p>ConnectionManager</p>
+<dl class="class">
+<dt id="mifcholib.cm.ConnectionManager">
+<em class="property">class </em><tt class="descclassname">mifcholib.cm.</tt><tt class="descname">ConnectionManager</tt><big>(</big><em>options</em><big>)</big><a class="headerlink" href="#mifcholib.cm.ConnectionManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supplies helpers and maintains state for managing connections and tunnels.</p>
+<dl class="method">
+<dt id="mifcholib.cm.ConnectionManager.add_tunnel">
+<tt class="descname">add_tunnel</tt><big>(</big><em>tunnel</em><big>)</big><a class="headerlink" href="#mifcholib.cm.ConnectionManager.add_tunnel" title="Permalink to this definition">¶</a></dt>
+<dd>Add a tunnel.</dd></dl>
+
+<dl class="method">
+<dt id="mifcholib.cm.ConnectionManager.connect">
+<tt class="descname">connect</tt><big>(</big><em>address</em>, <em>peer_id=None</em>, <em>use_tls=False</em><big>)</big><a class="headerlink" href="#mifcholib.cm.ConnectionManager.connect" title="Permalink to this definition">¶</a></dt>
+<dd>Create a connection to address. Possible via another mifcho instance.</dd></dl>
+
+<dl class="method">
+<dt id="mifcholib.cm.ConnectionManager.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#mifcholib.cm.ConnectionManager.run" title="Permalink to this definition">¶</a></dt>
+<dd>Start the connectionmanager.</dd></dl>
+
+<dl class="method">
+<dt id="mifcholib.cm.ConnectionManager.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="headerlink" href="#mifcholib.cm.ConnectionManager.stop" title="Permalink to this definition">¶</a></dt>
+<dd>Shut down connection-manager.</dd></dl>
+
+<dl class="method">
+<dt id="mifcholib.cm.ConnectionManager.teardown">
+<tt class="descname">teardown</tt><big>(</big><em>conn</em><big>)</big><a class="headerlink" href="#mifcholib.cm.ConnectionManager.teardown" title="Permalink to this definition">¶</a></dt>
+<dd>Tear down a socket properly and remove it from the connection-manager.</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mifcholib.cm.Listener">
+<em class="property">class </em><tt class="descclassname">mifcholib.cm.</tt><tt class="descname">Listener</tt><big>(</big><em>cm</em>, <em>address</em>, <em>use_tls</em><big>)</big><a class="headerlink" href="#mifcholib.cm.Listener" title="Permalink to this definition">¶</a></dt>
+<dd><p>TCP Socket bind/listen/accept on <cite>address</cite>.</p>
+<p>Wrap an accepted socket into a Connection and pass the connection
+off to a dispatcher based on matching in the routing map.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mifcholib.cm.PerformanceCollector">
+<em class="property">class </em><tt class="descclassname">mifcholib.cm.</tt><tt class="descname">PerformanceCollector</tt><big>(</big><em>sample_rate</em><big>)</big><a class="headerlink" href="#mifcholib.cm.PerformanceCollector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects performance measurements each &#8216;sample_rate&#8217; seconds.</p>
+<dl class="method">
+<dt id="mifcholib.cm.PerformanceCollector.log">
+<tt class="descname">log</tt><big>(</big><big>)</big><a class="headerlink" href="#mifcholib.cm.PerformanceCollector.log" title="Permalink to this definition">¶</a></dt>
+<dd>Retrieve the collected data.</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mifcholib.connection">
+<h2>Connection<a class="headerlink" href="#module-mifcholib.connection" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mifcholib.connection.Connection">
+<em class="property">class </em><tt class="descclassname">mifcholib.connection.</tt><tt class="descname">Connection</tt><big>(</big><em>s</em>, <em>use_tls=False</em><big>)</big><a class="headerlink" href="#mifcholib.connection.Connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper around socket and OpenSSL.</p>
+<dl class="classmethod">
+<dt id="mifcholib.connection.Connection.fromaddress">
+<em class="property">classmethod </em><tt class="descname">fromaddress</tt><big>(</big><em>address</em>, <em>use_tls=False</em><big>)</big><a class="headerlink" href="#mifcholib.connection.Connection.fromaddress" title="Permalink to this definition">¶</a></dt>
+<dd>Constructor-factory based on address = (host, port).</dd></dl>
+
+<dl class="method">
+<dt id="mifcholib.connection.Connection.read_bytes">
+<tt class="descname">read_bytes</tt><big>(</big><em>bytes_to_read</em><big>)</big><a class="headerlink" href="#mifcholib.connection.Connection.read_bytes" title="Permalink to this definition">¶</a></dt>
+<dd>Read &#8216;bytes_to_read&#8217; amount of bytes.</dd></dl>
+
+<dl class="method">
+<dt id="mifcholib.connection.Connection.readline">
+<tt class="descname">readline</tt><big>(</big><em>term='rn'</em><big>)</big><a class="headerlink" href="#mifcholib.connection.Connection.readline" title="Permalink to this definition">¶</a></dt>
+<dd>Read until end-of-line is reached or &#8216;term&#8217; is read.</dd></dl>
+
+<dl class="method">
+<dt id="mifcholib.connection.Connection.recv">
+<tt class="descname">recv</tt><big>(</big><em>length</em><big>)</big><a class="headerlink" href="#mifcholib.connection.Connection.recv" title="Permalink to this definition">¶</a></dt>
+<dd>Receive &#8216;length&#8217; bytes.</dd></dl>
+
+<dl class="method">
+<dt id="mifcholib.connection.Connection.send">
+<tt class="descname">send</tt><big>(</big><em>bytes</em><big>)</big><a class="headerlink" href="#mifcholib.connection.Connection.send" title="Permalink to this definition">¶</a></dt>
+<dd>Send &#8216;bytes&#8217;.</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mifcholib.connectors">
+<h2>Connectors<a class="headerlink" href="#module-mifcholib.connectors" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mifcholib.dispatchers">
+<h2>Dispatchers<a class="headerlink" href="#module-mifcholib.dispatchers" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mifcholib.dispatchers.Dispatcher">
+<em class="property">class </em><tt class="descclassname">mifcholib.dispatchers.</tt><tt class="descname">Dispatcher</tt><big>(</big><em>mapping</em><big>)</big><a class="headerlink" href="#mifcholib.dispatchers.Dispatcher" title="Permalink to this definition">¶</a></dt>
+<dd>Override dispatch() to implement the dispatching policy.</dd></dl>
+
+<dl class="class">
+<dt id="mifcholib.dispatchers.HTTPDispatcher">
+<em class="property">class </em><tt class="descclassname">mifcholib.dispatchers.</tt><tt class="descname">HTTPDispatcher</tt><big>(</big><em>mapping</em><big>)</big><a class="headerlink" href="#mifcholib.dispatchers.HTTPDispatcher" title="Permalink to this definition">¶</a></dt>
+<dd>Spits the connection a matching handler based on the query-url.</dd></dl>
+
+<dl class="class">
+<dt id="mifcholib.dispatchers.TCPDispatcher">
+<em class="property">class </em><tt class="descclassname">mifcholib.dispatchers.</tt><tt class="descname">TCPDispatcher</tt><big>(</big><em>mapping</em><big>)</big><a class="headerlink" href="#mifcholib.dispatchers.TCPDispatcher" title="Permalink to this definition">¶</a></dt>
+<dd>Spits the connection to the first available TCPHandler.</dd></dl>
+
+</div>
+<div class="section" id="module-mifcholib.messages">
+<h2>Messages<a class="headerlink" href="#module-mifcholib.messages" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mifcholib.messages.end_headers">
+<tt class="descclassname">mifcholib.messages.</tt><tt class="descname">end_headers</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#mifcholib.messages.end_headers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the carriage-return + line-feed to indicate end of headers.</p>
+<p>Any send_request or send_response must be eventually followed by end_headers()</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mifcholib.messages.get_headers">
+<tt class="descclassname">mifcholib.messages.</tt><tt class="descname">get_headers</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#mifcholib.messages.get_headers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse headers from incoming request/response</p>
+<blockquote>
+return dict header =&gt; value, eg. &#8216;Content-Length&#8217; : &#8216;430&#8217;</blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="mifcholib.messages.get_request">
+<tt class="descclassname">mifcholib.messages.</tt><tt class="descname">get_request</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#mifcholib.messages.get_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a request without body</p>
+<blockquote>
+return (method &#8220;string&#8221;, urlparse object, version &#8220;string&#8221;)</blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="mifcholib.messages.get_request_line">
+<tt class="descclassname">mifcholib.messages.</tt><tt class="descname">get_request_line</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#mifcholib.messages.get_request_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse request-line</p>
+<blockquote>
+return (method &#8220;string&#8221;, urlparse object, version &#8220;string&#8221;)</blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="mifcholib.messages.get_response">
+<tt class="descclassname">mifcholib.messages.</tt><tt class="descname">get_response</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#mifcholib.messages.get_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse status-line and headers of incoming response</p>
+<blockquote>
+return (version &#8220;string&#8221;, status &#8220;int&#8221;, reason &#8220;string&#8221;, headers &#8220;list of (header, value) tuples&#8221;)</blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="mifcholib.messages.get_response_line">
+<tt class="descclassname">mifcholib.messages.</tt><tt class="descname">get_response_line</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#mifcholib.messages.get_response_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse status-line</p>
+<blockquote>
+Return (version &#8220;string&#8221;, status &#8220;int&#8221;, reason &#8220;string&#8221;)</blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="mifcholib.messages.send_header">
+<tt class="descclassname">mifcholib.messages.</tt><tt class="descname">send_header</tt><big>(</big><em>c</em>, <em>keyword</em>, <em>value</em><big>)</big><a class="headerlink" href="#mifcholib.messages.send_header" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<p>Send header:</p>
+<div class="highlight-python"><pre>send_header('Content-Length', 340) =&gt; "Content-Length: 340</pre>
+</div>
+</blockquote>
+<p>&#8220;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mifcholib.messages.send_request">
+<tt class="descclassname">mifcholib.messages.</tt><tt class="descname">send_request</tt><big>(</big><em>c</em>, <em>type='GET'</em>, <em>url='/'</em>, <em>version='HTTP/1.1'</em>, <em>address=('localhost'</em>, <em>8080)</em>, <em>headers=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#mifcholib.messages.send_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the request-line of a request and the obligatory host header</p>
+<p>e.g. send_request(c, &#8216;GET&#8217;, &#8216;/&#8217;, &#8216;HTTP/1.1&#8217;, (&#8216;localhost&#8217;, 8080))</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mifcholib.messages.send_response">
+<tt class="descclassname">mifcholib.messages.</tt><tt class="descname">send_response</tt><big>(</big><em>c</em>, <em>code</em>, <em>message=None</em>, <em>version='HTTP/1.1'</em>, <em>headers=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#mifcholib.messages.send_response" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<p>Send a response without body</p>
+<p>e.g. send_reponse(200, &#8216;OK&#8217;, &#8216;HTTP/1.1&#8217;) =&gt; &#8220;HTTP/1.1 200 OK</p>
+</blockquote>
+<p>&#8220;</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mifcholib.peer_info">
+<h2>PeerInfo<a class="headerlink" href="#module-mifcholib.peer_info" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mifcholib.piper">
+<h2>Piper<a class="headerlink" href="#module-mifcholib.piper" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mifcholib.piper.Piper">
+<em class="property">class </em><tt class="descclassname">mifcholib.piper.</tt><tt class="descname">Piper</tt><big>(</big><em>cm</em>, <em>source</em>, <em>sink</em>, <em>buffer_size=1024</em>, <em>detach=False</em><big>)</big><a class="headerlink" href="#mifcholib.piper.Piper" title="Permalink to this definition">¶</a></dt>
+<dd>Pipes payloads between two sockets.</dd></dl>
+
+</div>
+<div class="section" id="module-mifcholib.tunnel">
+<h2>Tunnel<a class="headerlink" href="#module-mifcholib.tunnel" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mifcholib.threadutils">
+<h2>Thread Utilities<a class="headerlink" href="#module-mifcholib.threadutils" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mifcholib.threadutils.Worker">
+<em class="property">class </em><tt class="descclassname">mifcholib.threadutils.</tt><tt class="descname">Worker</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#mifcholib.threadutils.Worker" title="Permalink to this definition">¶</a></dt>
+<dd>A common interface for non-workpool threads.</dd></dl>
+
+<dl class="class">
+<dt id="mifcholib.threadutils.Workpool">
+<em class="property">class </em><tt class="descclassname">mifcholib.threadutils.</tt><tt class="descname">Workpool</tt><big>(</big><em>thread_name=''</em>, <em>max_instances=4</em><big>)</big><a class="headerlink" href="#mifcholib.threadutils.Workpool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic workpool implementation, each thread polls a queue for jobs.
+Executing the work() method when retrieving a job from the queue.</p>
+<p>Workpool interface: start/stop/order
+Override the work() method
+Optionally override the deallocate() method</p>
+<dl class="method">
+<dt id="mifcholib.threadutils.Workpool.deallocate">
+<tt class="descname">deallocate</tt><big>(</big><big>)</big><a class="headerlink" href="#mifcholib.threadutils.Workpool.deallocate" title="Permalink to this definition">¶</a></dt>
+<dd>Override this function to abort any blocking calls in the Handler.</dd></dl>
+
+<dl class="method">
+<dt id="mifcholib.threadutils.Workpool.order">
+<tt class="descname">order</tt><big>(</big><em>work</em><big>)</big><a class="headerlink" href="#mifcholib.threadutils.Workpool.order" title="Permalink to this definition">¶</a></dt>
+<dd>Place a job on the queue.</dd></dl>
+
+<dl class="method">
+<dt id="mifcholib.threadutils.Workpool.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="headerlink" href="#mifcholib.threadutils.Workpool.stop" title="Permalink to this definition">¶</a></dt>
+<dd>Stop the Workpool.</dd></dl>
+
+<dl class="method">
+<dt id="mifcholib.threadutils.Workpool.work">
+<tt class="descname">work</tt><big>(</big><em>work</em><big>)</big><a class="headerlink" href="#mifcholib.threadutils.Workpool.work" title="Permalink to this definition">¶</a></dt>
+<dd>Execute the actual work, override this method.</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mifcholib.ws">
+<h2>Websocket<a class="headerlink" href="#module-mifcholib.ws" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mifcholib.ws.receive_message">
+<tt class="descclassname">mifcholib.ws.</tt><tt class="descname">receive_message</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#mifcholib.ws.receive_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a Web Socket frame and return its payload as unicode string.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>request: mod_python request.</dd>
+<dt>Raises:</dt>
+<dd>ConnectionTerminatedException: when client already terminated.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference external" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference external" href="modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference external" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="#">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Welcome to mifcho&#8217;s documentation!</a><ul>
+<li><a class="reference external" href="#module-mifcholib.handlers">Handlers</a></li>
+<li><a class="reference external" href="#module-mifcholib.cm">ConnectionManager</a></li>
+<li><a class="reference external" href="#module-mifcholib.connection">Connection</a></li>
+<li><a class="reference external" href="#module-mifcholib.connectors">Connectors</a></li>
+<li><a class="reference external" href="#module-mifcholib.dispatchers">Dispatchers</a></li>
+<li><a class="reference external" href="#module-mifcholib.messages">Messages</a></li>
+<li><a class="reference external" href="#module-mifcholib.peer_info">PeerInfo</a></li>
+<li><a class="reference external" href="#module-mifcholib.piper">Piper</a></li>
+<li><a class="reference external" href="#module-mifcholib.tunnel">Tunnel</a></li>
+<li><a class="reference external" href="#module-mifcholib.threadutils">Thread Utilities</a></li>
+<li><a class="reference external" href="#module-mifcholib.ws">Websocket</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/index.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             >modules</a> |</li>
+        <li><a href="#">mifcho v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2010, Simon A. F. Lund.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>MIFCHO</title>
+<script language="javascript" type="text/javascript" src="jquery.js"></script>
+<script language="javascript" type="text/javascript" src="jquery.flot.js"></script>
+<script language="javascript" type="text/javascript" src="jquery.flot.stack.js"></script>
+
+</head>
+<body>
+	
+<table>
+	<tr>
+		<td>
+			Cpu Utilizations
+			<div id="cpu_util" style="width:512px;height:256px;"></div>
+		</td>
+		<td>Peers:<table id="peers"></table>
+				Bound sockets:<table id="bound_sockets"></table>
+				Opened sockets:<table id="opened_sockets"></table>
+		</td>
+	</tr>
+</div>
+
+<script id="source" language="javascript" type="text/javascript"> 
+$(function () {
+		
+		// Helper to do xhr fallback
+		var createXHR = function () {
+				try { return new XMLHttpRequest(); } catch(e) {}
+				try { return new ActiveXObject('MSXML3.XMLHTTP'); } catch(e) {}
+				try { return new ActiveXObject('MSXML2.XMLHTTP.3.0'); } catch(e) {}
+				try { return new ActiveXObject('Msxml2.XMLHTTP'); } catch(e) {}
+				try { return new ActiveXObject('Microsoft.XMLHTTP'); } catch(e) {}
+				throw new Error('Could not find XMLHttpRequest or an alternative.');
+		};
+		
+    var options = {
+        lines:	{ show: true },
+        points:	{ show: true },
+        xaxis:	{ tickDecimals: 0, tickSize: 1 }
+    };
+    var data = [];
+    var placeholder = $("#cpu_util");
+    
+    $.plot(placeholder, data, options);
+		
+		function transform_data(data) {
+				
+				var perf_log = data['perf_log'];
+				
+				var peers		= data['peers'];
+				var bound_sockets		= data['bound_sockets'];
+				var opened_sockets	= data['opened_sockets'];
+				
+				var cpu_util = [];
+				for(var i=0; i<perf_log.length; i++) {
+						cpu_util.push([perf_log[i][0],perf_log[i][1]]);	
+				}
+				
+				
+				$('#peers').html('');
+				for(var i=0; i<peers.length; i++) {
+					$('#peers').append('<tr><td>'+peers[i]+'</td></tr>');
+				}
+				
+				$('#bound_sockets').html('');
+				for(var i=0; i<bound_sockets.length; i++) {
+					$('#bound_sockets').append('<tr><td>'+bound_sockets[i]['sockname']+'</td></tr>');
+				}
+				
+				$('#opened_sockets').html('');
+				for(var i=0; i<opened_sockets.length; i++) {
+					$('#opened_sockets').append('<tr><td>'+opened_sockets[i]['sockname']+','+opened_sockets[i]['peername']+'</td></tr>');
+				}
+				//$.plot(placeholder, cpu_util);
+				
+		}
+		
+		function fetchData() {
+				
+				var xhr = createXHR();
+				xhr.open('GET', 'http://via.safl.dk:8001/admin');
+				xhr.onreadystatechange = function(event) {
+										
+					if (xhr.readyState == 4) {
+						if (xhr.responseText != '') {
+								
+								data = JSON.parse(xhr.responseText);
+								transform_data(data);
+								
+								setTimeout(fetchData, 1000); // Do it again in a sec..
+						
+						}
+						
+					}
+				};		
+				xhr.send();
+						
+		}
+
+		setTimeout(fetchData, 1000);
+
+});
+</script> 
+
+ </body>
+</html>
