@@ -43,8 +43,8 @@ class Connection:
     def readline(self, term='\r\n'):
         """Read until end-of-line is reached or 'term' is read."""
 
-        line = ''
-        c = ''
+        line    = ''
+        c       = ''
 
         while not line.endswith(term):
 
@@ -53,6 +53,7 @@ class Connection:
             if c:
                 line += c
             else:
+                logging.debug('LINE=[%s]' % line)
                 break
 
         return line

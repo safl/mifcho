@@ -62,16 +62,37 @@ def get_request_line(c):
         return (method "string", urlparse object, version "string")
     """
 
-    request       = c.readline()
-    request_match = request_regex.search(request)
+    rql     = None
+    request = c.readline()
+        
+    if request:
+        request_match   = request_regex.search(request)
+        rql = (
+            request_match.group(1),
+            request_match.group(2),
+            request_match.group(3)
+        )
     
-    return (
-        request_match.group(1),
-        request_match.group(2),
-        request_match.group(3)
-    )
+    return rql
 
-def get_request(c):
+#def get_request_line(c):
+#    """
+#    Parse request-line
+#
+#        return (method "string", urlparse object, version "string")
+#    """
+#
+#    request         = c.readline()
+#    logging.debug('rql: %s' % str(request))
+#    request_match   = request_regex.search(request)
+#    
+#    return (
+#        request_match.group(1),
+#        request_match.group(2),
+#        request_match.group(3)
+#    )
+
+def get_request(c): 
     """
     Parse a request without body
 
@@ -79,8 +100,9 @@ def get_request(c):
     """
 
     rql = (method, uri, version) = get_request_line(c)
-    logging.debug('RequestLine %s.' % pprint.pprint(rql))
+    
     headers = get_headers(c)
+    logging.debug('r-h: %s' % headers)
 
     return (method, uri, version, headers)
 
@@ -91,7 +113,8 @@ def send_response_line(c, code, message=None, version='HTTP/1.1'):
 
 def send_response(c, code, message=None, version='HTTP/1.1', headers=[]):
     """
-    Send a response without body
+    Send response-line and response-headers.
+    The response-body is sent "manually" on c.
 
     e.g. send_reponse(200, 'OK', 'HTTP/1.1') => "HTTP/1.1 200 OK\r\n"
     """
