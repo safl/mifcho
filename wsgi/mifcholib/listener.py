@@ -28,9 +28,6 @@ class Listener(Worker):
         self.s.listen(5)
 
         self.cm.bound.append(Connection(self.s, self.use_tls))     # Add to list of bound sockets
-
-        logging.debug('Listening on %s.' % repr(self.s.getsockname()))
-
         Worker.__init__(self, name='Listener')
 
     def work(self):
@@ -64,11 +61,10 @@ class Listener(Worker):
               dest_addr[0],
               dest_addr[1]
             )
-            logging.debug('New connection! [%s]' % conn_str)
-
+            
                                                       # Add to dispatcher
             self.cm.routing_map[dest_addr[1]]['dispatcher'].dispatch(conn, src_addr, dest_addr)
 
         except socket.error:
-            logging.debug("Socket barf... I give up...", exc_info=3)
+            logging.error("Socket barf... I give up...", exc_info=3)
             #self.stop()

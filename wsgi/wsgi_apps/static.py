@@ -1,9 +1,10 @@
+from urllib import unquote
 import mimetypes
 import logging
 import pprint
 import os
 
-def filestreaming_app(environ, start_response):
+def app(environ, start_response):
     
     def chunked_read(fd, size=4096):
         """Lazily read a file in chunks of "size" bytes."""
@@ -15,11 +16,11 @@ def filestreaming_app(environ, start_response):
             yield data
     
     #path = os.sep +'tmp'+ environ['PATH_INFO'].replace('/', os.sep)
-    path = os.sep +'media'+ os.sep +'remote01'+ os.sep + unquote(environ['PATH_INFO']).replace('/', os.sep)
+    path = "/home/safl/Desktop/projects/tecalibre/gui"+environ['PATH_INFO'].replace('/', os.sep)
     
     status      = '404 File Not Found'              # Default to file not found
     content     = '404 - File Not Found'
-    type        = 'text/plain'
+    mimetype    = 'text/plain'
     logging.debug('H!!!'+path)
     try:                                            # The file exists
         
@@ -29,23 +30,24 @@ def filestreaming_app(environ, start_response):
             guessed_type    = mimetypes.guess_type(path)[0]
             
             if guessed_type:
-                type = guessed_type
+                mimetype = guessed_type
             
             if os.path.isdir(path):
                 content = (p for p in pprint.pformat(os.listdir(path)))
             else:
                 fd      = open(path)
-                content = read_in_chunks(fd)
+                content = chunked_read(fd)
     
     except:                                         # Error accessing the file
         status      = '500 Internal Server Error'
         content     = '500 - Internal Server Error'
-        type        = 'text/plain'
+        mimetype    = 'text/plain'
+        logging.error("Bad mojo...", exc_info=3)
     
     start_response(
         status,
         [
-            ('Content-Type', type),
+            ('Content-Type', mimetype),
             ('Access-Control-Allow-Origin', '*')
         ]
     )

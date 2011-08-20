@@ -53,7 +53,6 @@ class Connection:
             if c:
                 line += c
             else:
-                logging.debug('LINE=[%s]' % line)
                 break
 
         return line

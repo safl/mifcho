@@ -49,9 +49,7 @@ class Connector(Worker):
         if conn:            
             conn.callback = self.cb_event   # Associate callback for reconnect
             self.on_connect(conn)           # Call overridden method
-            logging.debug('Waiting on call-back')
             self.cb_event.wait()            # Wait on callback
-            logging.debug('Got callback')
         else:
             tbegin = time.time()
             while self.running and time.time()-tbegin < self.retry_timeout:
@@ -111,7 +109,6 @@ class PeerConnector(Connector):
 
             try:
 
-                logging.debug('Waiting for next setup-request.')
                 request = (method, uri, version, headers) = messages.get_request(conn)
                 req_headers = dict(headers)
                 
@@ -169,8 +166,6 @@ class PeerConnector(Connector):
                 except:
                     logging.error('And it got even worse!', exc_info=3)
                 break
-
-        logging.debug('STOPPED!')    
 
 class ConnectionManager(threading.Thread):
     """Supplies helpers and maintains state for managing connections and tunnels."""
@@ -244,9 +239,9 @@ class ConnectionManager(threading.Thread):
                                   # and mapped in a "safe" way...
           'HobsHandler':          HobsHandler,
           'WebsocketHandler':     WebsocketHandler,
-          'ManagementHandler':    ManagementHandler,
+          #'ManagementHandler':    ManagementHandler,
+          #'StaticWebHandler':     StaticWebHandler,
           'PeerHandler':          PeerHandler,
-          'StaticWebHandler':     StaticWebHandler,
           'TCPTunnelingHandler':  TCPTunnelingHandler,
           'MiGISH':    MiGISH
         }
@@ -299,7 +294,6 @@ class ConnectionManager(threading.Thread):
         for p in self.options.peers:               # Instanciate PeerConnectors
 
             # Note the constructor should also utilize the "path"
-            logging.debug("Instantiating connector for %s." % repr(p))
             peer_connector = PeerConnector(
               self,
               peer          = p,
@@ -318,31 +312,22 @@ class ConnectionManager(threading.Thread):
 
         self.running = True                       # Now we are running!
 
-        logging.debug('Starting...')
         self.performance_collector.start()        # Start performance collector
 
         for t in self.handlers + \
                   self.connectors + \
                   self.listeners:                 # Start threads
             t.start()
-
-        logging.debug('Started!')
+        
         for t in [self.performance_collector]+ \
           self.handlers+ \
           self.connectors+ \
           self.listeners:                         # Wait for them to exit
             t.join()
 
-        logging.debug('Stopped.')
-
     def connect(self, address, peer_id=None, use_tls=False):
         """Create a connection to address. Possible via another mifcho instance."""
         
-        logging.debug('Connecting to: %s %s %s.' % (
-            pprint.pformat(address),
-            pprint.pformat(peer_id),
-            pprint.pformat(use_tls)            
-        ))
         conn = None
         peer = self.get_peer(peer_id)
         
@@ -392,7 +377,6 @@ class ConnectionManager(threading.Thread):
                 
             except:
                 logging.error('Failed connecting to socket!')
-                logging.debug('Failed receiving response!', exc_info=3)
                 
                 peer_conn = None
                 resp = (
@@ -435,7 +419,6 @@ class ConnectionManager(threading.Thread):
                 ) = messages.get_response(peer.connection)
             except:
                 logging.error('Failed receiving response!')
-                logging.debug('Failed receiving response!', exc_info=3)
                 resp = (
                     version,
                     status,
@@ -460,7 +443,6 @@ class ConnectionManager(threading.Thread):
         
         elif peer_id and not peer:
             logging.error('Could not find peer %s.' % repr(peer_id))
-            logging.debug('Peers=[%s]' % repr(self.peers))
             
         else:                               
             logging.error('Invalid params.')
@@ -506,7 +488,6 @@ class ConnectionManager(threading.Thread):
         success = False
         
         self.peer_lock.acquire()
-        logging.debug('Adding peer %s, %s.' % (pprint.pformat(peer), pprint.pformat(peer.id)))
         
         self.peers[peer.id] = peer
         

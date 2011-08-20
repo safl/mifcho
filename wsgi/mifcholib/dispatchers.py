@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from binascii import hexlify
 from urllib import unquote
+from Queue import Queue
+from threading import Thread
 import mimetypes
 import urlparse
 import logging
@@ -25,65 +27,10 @@ class TCPDispatcher(Dispatcher):
     """Spits the connection to the first available TCPHandler."""
 
     def dispatch(self, conn, src_addr, dst_addr):
-
-        logging.debug('TCP Dispatching...')
+        
         self.cm.routing_map[dst_addr[1]]['handlers'][0]['instance'].order(
           (conn, src_addr, self.cm.routing_map[dst_addr[1]]['handlers'][0]['params'])
         )
-
-#def mediastreaming_app(environ, start_response):
-#        
-#    sources = [os.sep+'tmp', os.sep+'media'+os.sep+'remote01']
-#    
-#    def chunked_read(fd, size=4096):
-#        """Lazily read a file in chunks of "size" bytes."""
-#        
-#        while True:
-#            data = fd.read(size)
-#            if not data:
-#                break
-#            yield data
-#            
-#    status      = '200 OK'
-#    type        = 'text/json'
-#    
-#    def infix_gen(g, pre='[', post='null]'):
-#        
-#        yield pre
-#        for c in g:
-#            yield c
-#        yield post
-#    
-#    try:    
-#        
-#        rest = "/(?P<database>.*)/(?P<collection>.*)/(?P<cmd>insert|save|update|remove|find|find_one)(?:/|,|(?:(?P<attr>\w+):(?P<val>\w+)))*(?:(?:skip=(?P<skip>\d+))|(?:limit=(?P<limit>\d+))|[/&?])*"
-#        args = "(?:(?P<key>\w+?)(?:\.(?P<op>like|match|equal))?:(?P<value>\w+),?)"
-#        m = re.match(rest, environ['PATH_INFO']+environ['QUERY_STRING'], re.IGNORECASE).groupdict()
-#        a = re.findall(args, environ['PATH_INFO'], re.IGNORECASE)
-#        print "MATCH! %s:%s:%s" % (environ, str(m), str(a))
-#        
-#        conn    = pymongo.Connection("localhost", 27017)
-#        db      = conn[m['database']]
-#        
-#        skip    = int(m['skip'])    if m['skip'] else 0
-#        limit   = int(m['limit'])   if m['limit'] else 0
-#        
-#        content = infix_gen(("%s,\n" % encode(p, default=json_util.default) for p in db[m["collection"]].find(spec=dict(a), skip=skip, limit=limit)))
-#        
-#    except:
-#        logging.debug("Something went wrong....", exc_info=3)
-#        status      = '404 File Not Found'          # Default to file not found
-#        content     = '404 - File Not Found'
-#        type        = 'text/html'
-#    
-#    start_response(
-#        status,
-#        [
-#            ('Content-Type', type),
-#            ('Access-Control-Allow-Origin', '*')
-#        ]
-#    )
-#    return content
 
 class WSGI(Dispatcher):
     
@@ -122,13 +69,22 @@ class WSGI(Dispatcher):
             'mifcho.id':    cm.identifier,
             'mifcho.conn':  None
         }
+        
+        Dispatcher.__init__(self, cm)
+        logging.debug('starting work-loop?')
     
     def _env(self, src_addr, dst_addr):
         env = self.base_environ.copy()
-        logging.debug("%s %s" % (str(src_addr), str(dst_addr)))
         return env
     
     def dispatch(self, conn, src_addr, dst_addr):
+        logging.debug('Dispatch() callled...')
+        t = Thread(target=self.__dispatch, args=(conn, src_addr, dst_addr))
+        logging.debug('Starting thread...')
+        t.start()
+        logging.debug('Thread started.')
+    
+    def __dispatch(self, conn, src_addr, dst_addr):
         
         req_count = 0
         
@@ -136,7 +92,6 @@ class WSGI(Dispatcher):
             
             req_count += 1
             
-            #env     = self.base_environ.copy()
             env     = self._env(src_addr, dst_addr)
             status  = '200 OK'
             
@@ -155,18 +110,17 @@ class WSGI(Dispatcher):
                 status          = status                # Update the non-local var "status"
                 headers_sent    = response_headers      # Update the non-local var "headers_sent"
                 
-                messages.send_response_line(            # Send request-line
+                messages.send_response_line(            # Send request-line on the wire
                     conn,
                     int(status.split(' ')[0]),
                     status.split(' ')[1],
                     version = WSGI.http_ver
                 )
                 for k, v in response_headers:
-                    messages.send_header(conn, k, v)    # Send some headers
+                    messages.send_header(conn, k, v)    # Send some headers on the wire
                 
                 return write
             
-            req = None
             try:
                 
                 req = (
@@ -176,7 +130,8 @@ class WSGI(Dispatcher):
                     req_headers
                 ) = messages.get_request(conn)
             except:
-                logging.debug('Failed retrieving request!', exc_info=3)
+                logging.error('Failed retrieving request!', exc_info=3)
+                req = None
                 break
             
             (scheme, netloc, path, query, fragment) = urlparse.urlsplit(req_uri)
@@ -187,11 +142,15 @@ class WSGI(Dispatcher):
             env['PATH_INFO']        = path
             env['QUERY_STRING']     = query+fragment
             
-            for (hk, hv) in req_headers:    # Transform headers, WSGI-style
+            # Non-wsgi-compliant MIFCHO hacks...
+            env['mifcho.cm']        = self.cm
+            env['mifcho.conn']      = conn          # not WSGI compatible!
+            
+            for (hk, hv) in req_headers:            # Transform headers, WSGI-style
                 hk = hk.replace('-','_').upper()
                 hv = hv.strip()
                 
-                if hk == 'CONTENT_LENGTH':                    
+                if hk == 'CONTENT_LENGTH':
                     env[hk] = int(hv.strip())
                 elif hk == 'CONTENT_TYPE':
                     env[hk] = hv.strip()
@@ -205,16 +164,27 @@ class WSGI(Dispatcher):
                 logging.debug('No CONTENT-LENGTH header or CONTENT-LENGTH == 0')
             
             # Determine app based on the request...
-            import pyremo, hello, info, static
-            app = pyremo.app
-            #app = hello.app
-            
             try:
-                content = app(env, start_response)
+                logging.debug(">>1 [%s]" % env["PATH_INFO"].split('/')[-1])
+                
+                parts = env["PATH_INFO"].split('/')
+                
+                app     = parts[1]
+                apps    = ['admin', 'hello', 'info', 'pyremo', 'static']
+                if app in apps:
+                    env["PATH_INFO"] = "/"+"/".join(parts[2:])
+                else:
+                    app = "static"
+                logging.debug(">>2 [%s]" % env["PATH_INFO"])
+                
+                m       = __import__(app, fromlist=['app'])
+                content = m.app(env, start_response)
+                
+                logging.debug("<< [%s]" % env["PATH_INFO"].split('/')[-1])
             except:
-                logging.debug('Unhandled app-error', exc_info=3)
+                logging.error('Unhandled app-error', exc_info=3)
                 break
-                        
+            
             try:
                 
                 messages.send_header(
@@ -233,13 +203,13 @@ class WSGI(Dispatcher):
                 conn.sendall('0\r\n\r\n')
                 
             except:
-                logging.debug('Error sending response!', exc_info=3)
+                logging.error('Error sending response!', exc_info=3)
                 break
         
         try:
             conn.close()
         except:
-            logging.debug('Failed closing the connection...')
+            logging.error('Failed closing the connection...')
             raise
 
 class HTTPDispatcher(Dispatcher):
@@ -298,7 +268,6 @@ class HTTPDispatcher(Dispatcher):
                 
         env = self.base_environ.copy()
         
-        logging.debug('Dispatching...')
         try:
                         
             req = (method, uri, version) = messages.get_request_line(conn)            
@@ -332,13 +301,14 @@ class HTTPDispatcher(Dispatcher):
             else:
                 logging.debug('No CONTENT-LENGTH header or CONTENT-LENGTH == 0')
             
+            env['mifcho.cm']            = self.cm
             env['mifcho.conn']          = conn  # not WSGI compatible!
             env['mifcho.parsed_url']    = urlparse.urlparse(
                 url=uri,
                 scheme='http'
             )
             
-            passed = False                  # Find a handler
+            passed = False                      # Find a handler
             for handler_d in self.cm.routing_map[dst_addr[1]]['handlers']:
 
                 criteria  = handler_d['criteria']

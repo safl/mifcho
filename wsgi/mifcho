@@ -69,9 +69,6 @@ def main():
   for section in (s for s in config.sections() if s != 'General'):
     options.handler_params[section] = dict(config.items(section))
   
-  logging.debug('HandlerParams=[%s]' % pprint.pformat(options.handler_params))
-  logging.debug('PEERS=%s' % repr(options.peers))
-    
   bind_addresses = []         # Get bind-addreses from config-file on the format:
   if config.has_option('General', 'bind') and config.get('General', 'bind'):
     bind_addresses = [urlparse(x) for x in config.get('General', 'bind').split('\n') if x]
@@ -110,17 +107,19 @@ def main():
   options.orchestration = orchestration
   
   # Setup connectionmanager MIFCHO!
+  logging.info('Starting...')
   conn_man = ConnectionManager(options)
   conn_man.start()
+  logging.info('Started.')
   
   while conn_man.running:
     try:
       i=raw_input()
       if i in ['q','e','c']:
+        logging.info('Exiting..')
         conn_man.stop()
         break
     except KeyboardInterrupt:
-      logging.debug("User wants to exit...")
       conn_man.stop()
       break
 

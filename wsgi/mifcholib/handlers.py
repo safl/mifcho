@@ -1,26 +1,14 @@
 #!/usr/bin/env python
-import threading
-import mimetypes
-import urlparse
-import binascii
 import logging
-import hashlib
 import base64
 import pprint
-import socket
-import struct
 import string
-import select
 import Queue
-import math
 import json
 import uuid
 import time
 import sys
 import re
-import os
-
-from binascii import hexlify
 
 import mifcholib.messages as messages
 import mifcholib.ws as websocket
@@ -29,112 +17,6 @@ from mifcholib.threadutils import Worker, WorkerPool
 from mifcholib.peer_info import PeerInfo
 from mifcholib.piper import Piper, VncPiper, WebsocketPiper, WebsocketVncPiper, HobsPiper, HobsVncPiper
 from mifcholib.tunnel import Tunnel
-
-class ManagementHandler(WorkerPool):
-    """
-    Accepts jobs on the form:
-
-        (conn, address, request_line)
-    """
-
-    def __init__(self, cm, workers=10):
-
-        self.cm             = cm
-        self.buffer_size    = 4096
-
-        WorkerPool.__init__(self, 'ManagementHandler', workers)
-
-    def work(self, env):
-        
-        conn = env['mifcho.conn']
-        
-        opened_sockets = []
-        for bo in self.cm.opened:
-            try:
-                opened_sockets.append({'sockname': bo.getsockname(), 'peername':bo.getpeername()})
-            except:
-                opened_sockets.append({'sockname': 'Not connected', 'peername':'Not connected'})
-
-        serializable_perf = {
-          'peers':          [repr(peer) for peer in self.cm.peers],
-          'bound_sockets':  [{'sockname': bs.getsockname()} for bs in self.cm.bound],
-          'opened_sockets': opened_sockets,
-          'perf_log':       [x for x in self.cm.performance_collector.log()]
-        }
-
-        try:
-            res_body = json.dumps(serializable_perf)
-            res_headers = [('Content-Length', len(res_body)),
-                           ('Content-Type', 'text/html'),
-                           ('Access-Control-Allow-Origin', '*')]
-
-            messages.send_response(conn, 200, 'OK', 'HTTP/1.1', res_headers)
-            conn.sendall(res_body)
-
-            self.cm.teardown(conn)
-        except:
-            logging.debug('Something went wrong', exc_info=3)
-
-class StaticWebHandler(WorkerPool):
-    """
-    Serves static files over HTTP.
-    
-    Accepts jobs on the form:
-
-        (conn, address, (method, uri, version))
-
-    """
-
-    def __init__(self, cm, workers=10, path_prefix=''):
-
-        self.path_prefix = path_prefix
-
-        WorkerPool.__init__(self, 'StaticWebHandler', workers)
-
-    def work(self, env):
-
-        conn = env['mifcho.conn']
-
-        path = self.path_prefix + os.sep + "/".join(env['PATH_INFO'].split('?')[0].split('/')[2:])
-
-        status      = 404
-        status_msg  = 'File Not Found'
-        res_body    = '404 - File Not Found'
-        content_type = ('Content-Type', 'text/plain')
-
-        if os.path.exists(path):
-
-            status      = 200
-            status_msg  = 'OK'
-            
-            if os.path.isdir(path):
-                res_body = pprint.pformat(os.listdir(path))
-            else:
-                fd = open(path)
-                res_body = fd.read()
-                fd.close()
-
-            content_type    = ('Content-Type', mimetypes.guess_type(path)[0])
-        
-        res_headers = [
-            ('Content-Length', len(res_body)),
-            content_type,
-            ('Access-Control-Allow-Origin', '*')
-        ]
-
-        messages.send_response(
-            conn,
-            status,
-            status_msg,
-            'HTTP/1.1',
-        res_headers)
-        if res_body:
-            conn.sendall(res_body)
-        
-        try:
-            conn.close()
-        except:
-            logging.debug('Something went wrong when trying to close socket.', exc_info=3)
 
 class HobsHandler(WorkerPool):
     """
@@ -188,8 +70,8 @@ class HobsHandler(WorkerPool):
                     ep_stuff = ( _, prefix, method, rid, wait, ep_host, ep_port, peer_id ) = req_path
                     
                 else:
-                    logging.error('Invalid path! %s' % repr(data))                    
-                logging.debug('EPSTUFF! %s' % pprint.pformat(ep_stuff))
+                    logging.error('Invalid path! %s' % repr(data))
+                
                 rid         = int(rid)
                 wait        = int(wait)
                 ep_address  = (ep_host, int(ep_port))
@@ -216,7 +98,7 @@ class HobsHandler(WorkerPool):
                     pipe.start()
 
                 except:
-                    logging.debug('Error when connecting to end-point host %s' % repr(ep_address), exc_info=3)
+                    logging.error('Error when connecting to end-point host %s' % repr(ep_address), exc_info=3)
 
                 headers = [ ('Content-Length', len(sid)),
                             ('Access-Control-Allow-Origin', '*')
@@ -235,7 +117,7 @@ class HobsHandler(WorkerPool):
                 if (session['rid']+1) == rid:
                     session['rid'] = rid
                 else:
-                    logging.debug('Incorrect RID, %d, %d.' % (rid, session['rid']))
+                    logging.error('Incorrect RID, %d, %d.' % (rid, session['rid']))
 
                 req_txt = ''
                 
@@ -301,7 +183,7 @@ class HobsHandler(WorkerPool):
                 logging.error('Unsupported HOBS request! %s.' % (repr(req_uri)))
 
         except:
-            logging.debug('Something went terribly wrong in the Hobs-handling...', exc_info=3)
+            logging.error('Something went terribly wrong in the Hobs-handling...', exc_info=3)
         
         i += 1
 
@@ -555,8 +437,7 @@ class MiGISH(WorkerPool):
         WorkerPool.__init__(self, 'MIGSession')
     
     def work(self, job):
-        
-        
+                
         (cli_conn, address, data) = job
         srv_conn = self.cm.connect(('localhost', 5900), '2222')
         pipe = VncPiper(self.cm, cli_conn, srv_conn, buffer_size=4096)

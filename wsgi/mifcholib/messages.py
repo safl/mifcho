@@ -75,23 +75,6 @@ def get_request_line(c):
     
     return rql
 
-#def get_request_line(c):
-#    """
-#    Parse request-line
-#
-#        return (method "string", urlparse object, version "string")
-#    """
-#
-#    request         = c.readline()
-#    logging.debug('rql: %s' % str(request))
-#    request_match   = request_regex.search(request)
-#    
-#    return (
-#        request_match.group(1),
-#        request_match.group(2),
-#        request_match.group(3)
-#    )
-
 def get_request(c): 
     """
     Parse a request without body
@@ -102,7 +85,6 @@ def get_request(c):
     rql = (method, uri, version) = get_request_line(c)
     
     headers = get_headers(c)
-    logging.debug('r-h: %s' % headers)
 
     return (method, uri, version, headers)
 

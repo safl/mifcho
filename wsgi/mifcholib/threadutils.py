@@ -21,11 +21,9 @@ class Worker(threading.Thread):
 
     def run(self):
         
-        logging.debug('Starting...')
         self.running = True
         while self.running:
             self.work()
-        logging.debug('Stopped.')
 
     def work(self):
         """Must be overridden."""
@@ -76,7 +74,6 @@ class WorkerPool(threading.Thread):
             try:
 
                 work = self.work_queue.get(True, 0.5)
-                logging.debug("Got work!")
                 if work:
                     self.work(work)
                 self.work_queue.task_done()
@@ -90,17 +87,13 @@ class WorkerPool(threading.Thread):
             except:             # Something much worse happened
                 logging.error("Bad mojo when working...", exc_info=3)
 
-        logging.debug('Exiting work loop.')
-
     def run(self):
         
-        logging.debug("Starting %d workers..." % len(self.instances))
         for w in self.instances: # Start worker-threads
             w.start()
 
         for w in self.instances: # Wait for them to exit
             w.join()
-        logging.debug("Stopped.")
 
     def stop(self):
         """Stop the WorkerPool."""

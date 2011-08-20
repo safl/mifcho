@@ -8,11 +8,24 @@ class TestRegex(unittest.TestCase):
     def test_find(self):
         
         f, a = q_parse('/foo/bar/find', '')
+        
+        self.assertEqual(f['cmd'], 'find')
+    
+    def test_find_q(self):
+        
+        f, a = q_parse('/foo/bar/find/', '')
+        
         self.assertEqual(f['cmd'], 'find')
         
     def test_find_sort(self):
         
         f, a = q_parse('/foo/bar/find/', 'sort=hej:ASC')
+        self.assertEqual(f['cmd'], 'find')
+        self.assertNotEqual(a['sort'], None)
+        
+    def test_find_sort_with_name(self):
+        
+        f, a = q_parse('/foo/bar/find/name/', 'sort=hej:ASC')
         self.assertEqual(f['cmd'], 'find')
         self.assertNotEqual(a['sort'], None)
         
@@ -58,7 +71,7 @@ class TestRegex(unittest.TestCase):
         
     def test_find_one(self):
         
-        f,a=q_parse('/foo/bar/find_one','')
+        f,a=q_parse('/foo/bar/find_one/','')
         self.assertEqual(f['cmd'], 'find_one')
         
     def test_find_fields(self):
@@ -66,6 +79,12 @@ class TestRegex(unittest.TestCase):
         f,a=q_parse('/foo/bar/find/hej,med,dig','')
         self.assertEquals(f['fields'], 'hej,med,dig')
         self.assertEquals(f['cmd'], 'find')
+        
+    def test_find_spec(self):
+        
+        f,a=q_parse('/foo/bar/find/name_like:r,oid_eq:0202020/','')
+        self.assertEquals(f['cmd'], 'find')
+        self.assertEquals(f['spec'], 'name_like:r,oid_eq:0202020')
         
 class TestCompose(unittest.TestCase):
 
@@ -76,27 +95,20 @@ class TestCompose(unittest.TestCase):
         
         self.assertEqual(args['skip'], 0)
         self.assertEqual(args['limit'], 0)
-        self.assertEqual(args['sort'], [('hej', 'ASC'), ('med', 'DESC'), ('dig', 'ASC')])
+        self.assertEqual(args['sort'], [('hej', pymongo.ASCENDING), ('med', pymongo.DESCENDING), ('dig', pymongo.ASCENDING)])
         
     def test_compose_fields(self):
         
         f, a = q_parse('/foo/bar/find/hej,med,dig', '')
         func, args = compose(f, a)
         self.assertEqual(args['fields'], ['hej','med','dig'])
-
-class TestConnect(unittest.TestCase):
-    
-    def test_connect(self):
-        f, a = q_parse('/media/pictures/find/name,path', 'limit=2&skip=10')
+        
+    def test_find_sort_with_name(self):
+        
+        f, a = q_parse('/foo/bar/find/name/', 'sort=hej:ASC')
         func, args = compose(f, a)
-        
-        conn    = pymongo.Connection()
-        db      = conn[func['db']]
-        coll    = db[func['coll']]
-        
-        if func['cmd'] == 'find':
-            for p in coll.find(**args):
-                print p
+        print func, args
 
+        
 if __name__ == '__main__':
     unittest.main()
